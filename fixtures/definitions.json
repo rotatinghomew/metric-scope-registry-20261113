@@ -1,0 +1,105 @@
+{
+  "metric_definitions": [
+    {
+      "name": "request_total",
+      "version": 1,
+      "unit": "request",
+      "expr": {"op": "count", "table": "requests"}
+    },
+    {
+      "name": "request_success",
+      "version": 1,
+      "unit": "request",
+      "expr": {
+        "op": "count",
+        "table": "requests",
+        "filters": [{"field": "success", "op": "eq", "value": true}]
+      }
+    },
+    {
+      "name": "request_completion",
+      "version": 1,
+      "unit": "ratio",
+      "expr": {
+        "op": "ratio",
+        "terms": {
+          "numerator": {"op": "ref", "metric": "request_success", "version": 1},
+          "denominator": {"op": "ref", "metric": "request_total", "version": 1}
+        }
+      }
+    },
+    {
+      "name": "call_total",
+      "version": 1,
+      "unit": "call",
+      "expr": {"op": "count", "table": "calls"}
+    },
+    {
+      "name": "call_success",
+      "version": 1,
+      "unit": "call",
+      "expr": {
+        "op": "count",
+        "table": "calls",
+        "filters": [{"field": "success", "op": "eq", "value": true}]
+      }
+    },
+    {
+      "name": "call_completion",
+      "version": 1,
+      "unit": "ratio",
+      "expr": {
+        "op": "ratio",
+        "terms": {
+          "numerator": {"op": "ref", "metric": "call_success", "version": 1},
+          "denominator": {"op": "ref", "metric": "call_total", "version": 1}
+        }
+      }
+    },
+    {
+      "name": "active_users",
+      "version": 1,
+      "unit": "user",
+      "expr": {
+        "op": "distinct_count",
+        "table": "user_days",
+        "filters": [{"field": "active", "op": "eq", "value": true}]
+      }
+    },
+    {
+      "name": "latency_p95",
+      "version": 1,
+      "unit": "ms",
+      "expr": {"op": "quantile", "table": "calls", "field": "latency_ms", "q": 0.95}
+    },
+    {
+      "name": "requests_with_office_call",
+      "version": 1,
+      "unit": "request",
+      "expr": {
+        "op": "ref",
+        "metric": "call_success",
+        "version": 1,
+        "bridge": {"from": "requests", "to": "calls", "rule": "multicast"},
+        "filters": [{"field": "app", "op": "eq", "value": "office"}]
+      }
+    },
+    {
+      "name": "request_completion_via_calls",
+      "version": 1,
+      "unit": "ratio",
+      "expr": {
+        "op": "ref",
+        "metric": "call_completion",
+        "version": 1,
+        "bridge": {"from": "requests", "to": "calls", "rule": "multicast"}
+      }
+    },
+    {
+      "name": "latency_p95",
+      "version": 2,
+      "unit": "ms",
+      "expr": {"op": "quantile", "table": "calls", "field": "latency_ms", "q": 0.9}
+    }
+  ]
+}
